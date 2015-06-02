@@ -1,360 +1,176 @@
 <html>
-	
-	<head>
-		<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.1.3.min.js"></script>
-		<script src="genetic-0.1.14.js"></script>
-		<script src="solver.js"></script>
-	</head>
-	
-	<body>
-		
-		<button class="start">start</button>
-					 
-		<div></div>
-		 
-		<canvas id="canvas" width="350" height="350"></canvas>
-		
-		
-		<script>
-var black = '#000000';			
-var orange = '#FF6600';
-var brown = '#663300';
-var lightblue = '#00FFFF';
-var purple = '#9900CC';
-var blue = '#0000FF';
-var green = '#00FF00';
-var yellow = '#FFFF00';
-var red = '#FF0000';			
- 
-$("button").click(function(e) {
-	
-	var config = {
-		"iterations": 150
-		, "size": 5000
-		, "crossover": 0
-		, "mutation": 1
-		, "skip": 20
-	};
-	var userData = { 
-		"initial": {
-			pizza: [orange, brown, lightblue, purple, blue, green, yellow, red],
-			cars: [orange, brown, lightblue, purple, blue, yellow, green, red],
-      ops: []
-		} 
-	};
-	genetic.evolve(config, userData);
-});
-
-var genetic = Genetic.create();
-genetic.optimize = Genetic.Optimize.Minimize;
-genetic.select1 = Genetic.Select1.Tournament3;
-genetic.select2 = Genetic.Select2.Tournament3;
-
-genetic.seed = function() {
-	return this.userData["initial"];
-};
-genetic.mutate = function(entity) {
-
-	var operations = [
-		function flipUnder(game){
-			var temp = game.pizza;
-			var pizza = [temp[3], temp[2], temp[1], temp[0], temp[4], temp[5], temp[6], temp[7]];
-			temp = game.cars;
-			var cars = [temp[3], temp[2], temp[1], temp[0], temp[4], temp[5], temp[6], temp[7]];
-			var result = { pizza: pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		function flipUpper(game){
-			var temp = game.pizza;
-			var pizza = [temp[0], temp[1], temp[2], temp[3], temp[7], temp[6], temp[5], temp[4]];
-			temp = game.cars;
-			var cars = [temp[0], temp[1], temp[2], temp[3], temp[7], temp[6], temp[5], temp[4]];
-			var result = { pizza: pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		function flipLeft(game){
-			var temp = game.pizza;
-			var pizza = [temp[0], temp[1], temp[5], temp[4], temp[3], temp[2], temp[6], temp[7]];
-			temp = game.cars;
-			var cars = [temp[0], temp[1], temp[5], temp[4], temp[3], temp[2], temp[6], temp[7]];
-			var result = { pizza: pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		function flipRight(game){
-			var temp = game.pizza;
-			var pizza = [temp[7], temp[6], temp[2], temp[3], temp[4], temp[5], temp[1], temp[0]];
-			temp = game.cars;
-			var cars = [temp[7], temp[6], temp[2], temp[3], temp[4], temp[5], temp[1], temp[0]];
-			var result = { pizza: pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		function rotateCarsC1(game){
-			var temp = game.cars;
-			var cars = [temp[7], temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], temp[6]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		function rotateCarsC2(game){
-			var temp = game.cars;
-			var cars = [temp[6], temp[7], temp[0], temp[1], temp[2], temp[3], temp[4], temp[5]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		function rotateCarsC3(game){
-			var temp = game.cars;
-			var cars = [temp[5], temp[6], temp[7], temp[0], temp[1], temp[2], temp[3], temp[4]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		function rotateCarsC4(game){
-			var temp = game.cars;
-			var cars = [temp[4], temp[5], temp[6], temp[7], temp[0], temp[1], temp[2], temp[3]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		function rotateCarsC5(game){
-			var temp = game.cars;
-			var cars = [temp[3], temp[4], temp[5], temp[6], temp[7], temp[0], temp[1], temp[2]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		function rotateCarsC6(game){
-			var temp = game.cars;
-			var cars = [temp[2], temp[3], temp[4], temp[5], temp[6], temp[7], temp[0], temp[1]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		function rotateCarsC7(game){
-			var temp = game.cars;
-			var cars = [temp[1], temp[2], temp[3], temp[4], temp[5], temp[6], temp[7], temp[0]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		}];	
-	
-	var numberOfOps = 1 + Math.floor(Math.random() * 10);
-	var game = entity;
-	var opIndex = 0;
-	var op;
-	for(var i = 0; i < numberOfOps; i++){
-		opIndex = Math.floor(Math.random() * operations.length);
-		op = operations[opIndex];
-		game = op(game);
-    game.ops.push(op.name);
-	}
-	return game;
-};
-genetic.crossover = function(mother, father) {
-	// two-point crossover. In this case there is no crossover.
-	// let's see if the algorithm then still works
-	var son = father;
-	var daughter = mother;
-	
-	return [son, daughter];
-};
-genetic.fitness = function(entity) {
-	function distance(game) {
-		
-		return game.cars.map(function(c, i) {
-      
-      var pI = game.pizza.indexOf(c);
-      var dist = Math.abs(i - pI);
-      dist = Math.abs(dist > 4 ? dist - 8 : dist);
-			return dist;		
-		}).reduce(function(prev, cur) { return prev + cur; }, 0);
-	}
-	return distance(entity);
-};
-genetic.generation = function(pop, generation, stats) {
-	return pop[0].fitness != 0;
-};
-
-genetic.notification = function(pop, generation, stats, isFinished) {
-	var value = pop[0].entity;
-	this.last = this.last||value;
-		
-	function drawCircle(canvas, size, start, end, color) {
-		 
-		canvas.fillStyle = color;
-		//draw a circle
-		canvas.beginPath();
-		canvas.moveTo(175, 175);
-		canvas.arc(175, 175, size, start*Math.PI, Math.PI*end, false);
-		canvas.lineTo(175, 175); 
-		canvas.closePath();
-		canvas.fill();
-	}	
   
-  function distance(game) {
-		
-		return game.cars.map(function(c, i) {
-      
-      var pI = game.pizza.indexOf(c);
-      var dist = Math.abs(i - pI);
-      dist = Math.abs(dist > 4 ? dist - 8 : dist);
-			return dist;		
-		}).reduce(function(prev, cur) { return prev + cur; }, 0);
-	}
-	
-  function drawWithFitness(canvasid, game) {
-				
-		//get a reference to the canvas
-		var ctx = $('#' + canvasid)[0].getContext("2d");
-		ctx.clearRect ( 0 , 0 , $('#' + canvasid)[0].width, $('#' + canvasid)[0].height );
-		game.cars.forEach(function(c, i) { drawCircle(ctx, 120, (i*0.25)+0.05, (i*0.25)+0.2, c); });
-		drawCircle(ctx, 102, 0, 2, '#000000');
-		game.pizza.forEach(function(p, i) { drawCircle(ctx, 100, i*0.25, (i*0.25)+0.25, p); });
-		ctx.fillStyle = black;
-		ctx.font = "24px serif";
-		ctx.fillText(distance(game), 270, 45);
-	}
+  <head>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.1.3.min.js"></script>
+    <script src="genetic-0.1.14.js"></script>
+    <script src="solver.js"></script>
+      <style>
+        select.pizzaslice { 
+          width: 154px;
+        }
+        select.car {
+          width: 75px;
+        }
+      </style>
+  </head>
   
-	function draw(canvasid, game) {
-				
-		//get a reference to the canvas
-		var ctx = $('#' + canvasid)[0].getContext("2d");
-		ctx.clearRect ( 0 , 0 , $('#' + canvasid)[0].width, $('#' + canvasid)[0].height );
-		game.cars.forEach(function(c, i) { drawCircle(ctx, 120, (i*0.25)+0.05, (i*0.25)+0.2, c); });
-		drawCircle(ctx, 102, 0, 2, '#000000');
-		game.pizza.forEach(function(p, i) { drawCircle(ctx, 100, i*0.25, (i*0.25)+0.25, p); });
-		ctx.fillStyle = black;
-		ctx.font = "24px serif";
-		ctx.fillText(pop[0].fitness.toPrecision(1), 270, 45);
-	}	
-  
-  function simplifySolution(ops){
-   var simpleOps = [];
-   var prevOps = "";
-   var curOps = "";
-   var rotateCOps = 0;
-   for(var i =0; i < ops.length; i++){
-     curOps = ops[i];
-     
-     // Cancel out two equal flips in combination
-//     if(curOps.indexOf("flip") === 0 && prevOps.indexOf("flip") === 0 && prevOps == curOps){
-//       simpleOps.pop();
-//       prevOps = "";
-//     // combine all rotations into one
-//     } else 
-     if(curOps.indexOf("rotateCarsC") === 0){
-       rotateCOps += parseInt(curOps.substr(11));
-       prevOps = curOps;
-     } else if (rotateCOps > 0){
-       var nrs = rotateCOps % 8;
-       if(nrs > 0){
-         simpleOps.push( "rotateCarsC" + (rotateCOps % 8) );
-         rotateCOps = 0;
-         simpleOps.push(curOps);
-       }
-       prevOps = curOps;
-     } else {
-       simpleOps.push(curOps);
-       prevOps = curOps;
-     }
-   } 
-   
-   return simpleOps;
-  }
-  
-	draw('canvas', value);
-	this.last = value;
-  
-  var operations = {
-		"flipUnder": function flipUnder(game){
-			var temp = game.pizza;
-			var pizza = [temp[3], temp[2], temp[1], temp[0], temp[4], temp[5], temp[6], temp[7]];
-			temp = game.cars;
-			var cars = [temp[3], temp[2], temp[1], temp[0], temp[4], temp[5], temp[6], temp[7]];
-			var result = { pizza: pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		"flipUpper": function flipUpper(game){
-			var temp = game.pizza;
-			var pizza = [temp[0], temp[1], temp[2], temp[3], temp[7], temp[6], temp[5], temp[4]];
-			temp = game.cars;
-			var cars = [temp[0], temp[1], temp[2], temp[3], temp[7], temp[6], temp[5], temp[4]];
-			var result = { pizza: pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		"flipLeft": function flipLeft(game){
-			var temp = game.pizza;
-			var pizza = [temp[0], temp[1], temp[5], temp[4], temp[3], temp[2], temp[6], temp[7]];
-			temp = game.cars;
-			var cars = [temp[0], temp[1], temp[5], temp[4], temp[3], temp[2], temp[6], temp[7]];
-			var result = { pizza: pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		"flipRight": function flipRight(game){
-			var temp = game.pizza;
-			var pizza = [temp[7], temp[6], temp[2], temp[3], temp[4], temp[5], temp[1], temp[0]];
-			temp = game.cars;
-			var cars = [temp[7], temp[6], temp[2], temp[3], temp[4], temp[5], temp[1], temp[0]];
-			var result = { pizza: pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		"rotateCarsC1": function rotateCarsC1(game){
-			var temp = game.cars;
-			var cars = [temp[7], temp[0], temp[1], temp[2], temp[3], temp[4], temp[5], temp[6]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		"rotateCarsC2": function rotateCarsC2(game){
-			var temp = game.cars;
-			var cars = [temp[6], temp[7], temp[0], temp[1], temp[2], temp[3], temp[4], temp[5]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		"rotateCarsC3": function rotateCarsC3(game){
-			var temp = game.cars;
-			var cars = [temp[5], temp[6], temp[7], temp[0], temp[1], temp[2], temp[3], temp[4]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		"rotateCarsC4": function rotateCarsC4(game){
-			var temp = game.cars;
-			var cars = [temp[4], temp[5], temp[6], temp[7], temp[0], temp[1], temp[2], temp[3]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		"rotateCarsC5": function rotateCarsC5(game){
-			var temp = game.cars;
-			var cars = [temp[3], temp[4], temp[5], temp[6], temp[7], temp[0], temp[1], temp[2]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		"rotateCarsC6": function rotateCarsC6(game){
-			var temp = game.cars;
-			var cars = [temp[2], temp[3], temp[4], temp[5], temp[6], temp[7], temp[0], temp[1]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		},
-		"rotateCarsC7": function rotateCarsC7(game){
-			var temp = game.cars;
-			var cars = [temp[1], temp[2], temp[3], temp[4], temp[5], temp[6], temp[7], temp[0]];
-			var result = { pizza: game.pizza, cars: cars, ops: game.ops};
-			return result;
-		}};	
-  
-  if(isFinished){
-    var ops = simplifySolution(value.ops);
-    if(confirm('Solution in '+ops.length+' steps. Visualize?')){
-      var initial = this.userData["initial"];
-      initial = {
-        pizza: initial.pizza,
-        cars: initial.cars,
-        ops: []
+  <body>
+    <select class="pizzaslice" name="slice1">
+      <option selected>paars / lichtblauw</option>
+      <option>lichtblauw / paars</option>
+      <option>groen / blauw</option>
+      <option>blauw / groen</option>
+      <option>oranje / bruin</option>
+      <option>bruin / oranje</option>
+      <option>rood / geel</option>
+      <option>geel / rood</option>
+    </select>
+    <select class="pizzaslice" name="slice2">
+      <option>paars / lichtblauw</option>
+      <option>lichtblauw / paars</option>
+      <option selected>groen / blauw</option>
+      <option>blauw / groen</option>
+      <option>oranje / bruin</option>
+      <option>bruin / oranje</option>
+      <option>rood / geel</option>
+      <option>geel / rood</option>
+    </select>
+    <select class="pizzaslice" name="slice3">
+      <option>paars / lichtblauw</option>
+      <option>lichtblauw / paars</option>
+      <option>groen / blauw</option>
+      <option>blauw / groen</option>
+      <option>oranje / bruin</option>
+      <option>bruin / oranje</option>
+      <option selected>rood / geel</option>
+      <option>geel / rood</option>
+    </select>
+    <select class="pizzaslice" name="slice4">
+      <option>paars / lichtblauw</option>
+      <option>lichtblauw / paars</option>
+      <option>groen / blauw</option>
+      <option>blauw / groen</option>
+      <option>oranje / bruin</option>
+      <option selected>bruin / oranje</option>
+      <option>rood / geel</option>
+      <option>geel / rood</option>
+    </select>
+    <div></div>
+    <select class="car" name="car1">
+      <option>paars</option><option>lichtblauw</option>
+      <option>groen</option><option>blauw</option>
+      <option>oranje</option><option>bruin</option>
+      <option selected>rood</option><option>geel</option>
+    </select>
+    <select class="car" name="car2">
+      <option>paars</option><option>lichtblauw</option>
+      <option selected>groen</option><option>blauw</option>
+      <option>oranje</option><option>bruin</option>
+      <option>rood</option><option>geel</option>
+    </select>
+    <select class="car" name="car3">
+      <option selected>paars</option><option>lichtblauw</option>
+      <option>groen</option><option>blauw</option>
+      <option>oranje</option><option>bruin</option>
+      <option>rood</option><option>geel</option>
+    </select>
+    <select class="car" name="car4">
+      <option>paars</option><option>lichtblauw</option>
+      <option>groen</option><option selected>blauw</option>
+      <option>oranje</option><option>bruin</option>
+      <option>rood</option><option>geel</option>
+    </select>
+    <select class="car" name="car5">
+      <option>paars</option><option>lichtblauw</option>
+      <option>groen</option><option>blauw</option>
+      <option>oranje</option><option selected>bruin</option>
+      <option>rood</option><option>geel</option>
+    </select>
+    <select class="car" name="car6">
+      <option>paars</option><option>lichtblauw</option>
+      <option>groen</option><option>blauw</option>
+      <option>oranje</option><option>bruin</option>
+      <option>rood</option><option selected>geel</option>
+    </select>
+    <select class="car" name="car7">
+      <option>paars</option><option>lichtblauw</option>
+      <option>groen</option><option>blauw</option>
+      <option selected>oranje</option><option>bruin</option>
+      <option>rood</option><option>geel</option>
+    </select>
+    <select class="car" name="car8">
+      <option>paars</option><option selected>lichtblauw</option>
+      <option>groen</option><option>blauw</option>
+      <option>oranje</option><option>bruin</option>
+      <option>rood</option><option>geel</option>
+    </select>
+    <div></div>
+    <button class="start">start</button>
+    <div></div>
+    <canvas id="canvas" width="350" height="350"></canvas>
+    <div></div>
+    
+    <script>
+      var zwart, black, oranje, orange, bruin, brown,
+      lichtblauw, lightblue, paars, purple, blauw, blue, groen, green,
+      geel, yellow, rood, red;
+      zwart = black = '#000000';			
+      oranje = orange = '#FF6600';
+      bruin =  brown = '#663300';
+      lichtblauw = lightblue = '#00FFFF';
+      paars = purple = '#9900CC';
+      blauw = blue = '#0000FF';
+      groen = green = '#00FF00';
+      geel = yellow = '#FFFF00';
+      rood = red = '#FF0000';
+       
+      function getModel() {
+        var pizza = [], cars = [], ops = [];
+        
+        $("select[name='slice1']").val().split(' / ').forEach(function (k) { pizza.push(eval(k)); });
+        $("select[name='slice2']").val().split(' / ').forEach(function (k) { pizza.push(eval(k)); });
+        $("select[name='slice3']").val().split(' / ').forEach(function (k) { pizza.push(eval(k)); });
+        $("select[name='slice4']").val().split(' / ').forEach(function (k) { pizza.push(eval(k)); });
+        
+        cars.push(eval($("select[name='car1']").val()));
+        cars.push(eval($("select[name='car2']").val()));
+        cars.push(eval($("select[name='car3']").val()));
+        cars.push(eval($("select[name='car4']").val()));
+        cars.push(eval($("select[name='car5']").val()));
+        cars.push(eval($("select[name='car6']").val()));
+        cars.push(eval($("select[name='car7']").val()));
+        cars.push(eval($("select[name='car8']").val()));
+        
+        return {
+          pizza: pizza, cars: cars, ops: ops
+        };
       };
-      $('<canvas id="ops" width="350" height="350"></canvas>').appendTo("body");
-      draw('ops', initial);
-      for(var i = 0; i < ops.length; i++){
-        var op = ops[i];
-        $('<h1>' + op + '</h1>').appendTo("body");
-        $('<canvas id="ops' + i + '" width="350" height="350"></canvas>').appendTo("body");
-        initial = operations[op](initial);
-        drawWithFitness('ops' + i, initial);
-      }
-    }  
-  }
-};
-		</script>
-	</body>
+       
+      $("select").change(function(e) {
+        genetic.drawWithFitness('canvas', getModel(), null);
+      });
+       
+      $("button").click(function(e) {
+      	
+      	var config = {
+      		"iterations": 150
+      		, "size": 5000
+      		, "crossover": 0
+      		, "mutation": 1
+      		, "skip": 20
+      	};
+      	var userData = { 
+      		"initial": {
+      			pizza: [orange, brown, lightblue, purple, blue, green, yellow, red],
+      			cars: [orange, brown, lightblue, purple, blue, yellow, green, red],
+            		ops: []
+      		} 
+      	};
+      	genetic.evolve(config, userData);
+      });
+      
+      $("select").change();
+    </script>
+  </body>
+
 </html>
