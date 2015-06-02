@@ -28,10 +28,10 @@
     <select class="pizzaslice" name="slice2">
       <option>paars / lichtblauw</option>
       <option>lichtblauw / paars</option>
-      <option selected>groen / blauw</option>
+      <option>groen / blauw</option>
       <option>blauw / groen</option>
       <option>oranje / bruin</option>
-      <option>bruin / oranje</option>
+      <option selected>bruin / oranje</option>
       <option>rood / geel</option>
       <option>geel / rood</option>
     </select>
@@ -39,10 +39,10 @@
       <option>paars / lichtblauw</option>
       <option>lichtblauw / paars</option>
       <option>groen / blauw</option>
-      <option>blauw / groen</option>
+      <option selected>blauw / groen</option>
       <option>oranje / bruin</option>
       <option>bruin / oranje</option>
-      <option selected>rood / geel</option>
+      <option>rood / geel</option>
       <option>geel / rood</option>
     </select>
     <select class="pizzaslice" name="slice4">
@@ -51,64 +51,64 @@
       <option>groen / blauw</option>
       <option>blauw / groen</option>
       <option>oranje / bruin</option>
-      <option selected>bruin / oranje</option>
+      <option>bruin / oranje</option>
       <option>rood / geel</option>
-      <option>geel / rood</option>
+      <option selected>geel / rood</option>
     </select>
     <div></div>
     <select class="car" name="car1">
-      <option>paars</option><option>lichtblauw</option>
-      <option>groen</option><option>blauw</option>
-      <option>oranje</option><option>bruin</option>
-      <option selected>rood</option><option>geel</option>
-    </select>
-    <select class="car" name="car2">
-      <option>paars</option><option>lichtblauw</option>
-      <option selected>groen</option><option>blauw</option>
-      <option>oranje</option><option>bruin</option>
-      <option>rood</option><option>geel</option>
-    </select>
-    <select class="car" name="car3">
       <option selected>paars</option><option>lichtblauw</option>
       <option>groen</option><option>blauw</option>
       <option>oranje</option><option>bruin</option>
       <option>rood</option><option>geel</option>
     </select>
-    <select class="car" name="car4">
-      <option>paars</option><option>lichtblauw</option>
-      <option>groen</option><option selected>blauw</option>
-      <option>oranje</option><option>bruin</option>
-      <option>rood</option><option>geel</option>
-    </select>
-    <select class="car" name="car5">
-      <option>paars</option><option>lichtblauw</option>
-      <option>groen</option><option>blauw</option>
-      <option>oranje</option><option selected>bruin</option>
-      <option>rood</option><option>geel</option>
-    </select>
-    <select class="car" name="car6">
-      <option>paars</option><option>lichtblauw</option>
-      <option>groen</option><option>blauw</option>
-      <option>oranje</option><option>bruin</option>
-      <option>rood</option><option selected>geel</option>
-    </select>
-    <select class="car" name="car7">
-      <option>paars</option><option>lichtblauw</option>
-      <option>groen</option><option>blauw</option>
-      <option selected>oranje</option><option>bruin</option>
-      <option>rood</option><option>geel</option>
-    </select>
-    <select class="car" name="car8">
+    <select class="car" name="car2">
       <option>paars</option><option selected>lichtblauw</option>
       <option>groen</option><option>blauw</option>
       <option>oranje</option><option>bruin</option>
       <option>rood</option><option>geel</option>
     </select>
+    <select class="car" name="car3">
+      <option>paars</option><option>lichtblauw</option>
+      <option>groen</option><option>blauw</option>
+      <option>oranje</option><option selected>bruin</option>
+      <option>rood</option><option>geel</option>
+    </select>
+    <select class="car" name="car4">
+      <option>paars</option><option>lichtblauw</option>
+      <option>groen</option><option>blauw</option>
+      <option selected>oranje</option><option>bruin</option>
+      <option>rood</option><option>geel</option>
+    </select>
+    <select class="car" name="car5">
+      <option>paars</option><option>lichtblauw</option>
+      <option>groen</option><option selected>blauw</option>
+      <option>oranje</option><option>bruin</option>
+      <option>rood</option><option>geel</option>
+    </select>
+    <select class="car" name="car6">
+      <option>paars</option><option>lichtblauw</option>
+      <option selected>groen</option><option>blauw</option>
+      <option>oranje</option><option>bruin</option>
+      <option>rood</option><option>geel</option>
+    </select>
+    <select class="car" name="car7">
+      <option>paars</option><option>lichtblauw</option>
+      <option>groen</option><option>blauw</option>
+      <option>oranje</option><option>bruin</option>
+      <option>rood</option><option selected>geel</option>
+    </select>
+    <select class="car" name="car8">
+      <option>paars</option><option>lichtblauw</option>
+      <option>groen</option><option>blauw</option>
+      <option>oranje</option><option>bruin</option>
+      <option selected>rood</option><option>geel</option>
+    </select>
     <div></div>
     <button class="start">start</button>
     <div></div>
     <canvas id="canvas" width="350" height="350"></canvas>
-    <div></div>
+    <div class="oplossing"></div>
     
     <script>
       var zwart, black, oranje, orange, bruin, brown,
@@ -151,22 +151,18 @@
       });
        
       $("button").click(function(e) {
-      	
-      	var config = {
-      		"iterations": 150
-      		, "size": 5000
-      		, "crossover": 0
-      		, "mutation": 1
-      		, "skip": 20
-      	};
-      	var userData = { 
-      		"initial": {
-      			pizza: [orange, brown, lightblue, purple, blue, green, yellow, red],
-      			cars: [orange, brown, lightblue, purple, blue, yellow, green, red],
-            		ops: []
-      		} 
-      	};
-      	genetic.evolve(config, userData);
+        
+        var config = {
+          "iterations": 150
+          , "size": 1000
+          , "crossover": 0
+          , "mutation": 1
+          , "skip": 0
+        };
+        var userData = { 
+          "initial": getModel() 
+        };
+        genetic.evolve(config, userData);
       });
       
       $("select").change();

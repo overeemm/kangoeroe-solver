@@ -6,13 +6,21 @@ genetic.select2 = Genetic.Select2.Tournament3;
 genetic.operations = {
   "flipUnder": function flipUnder(game) {
     var temp = game.pizza;
-    var pizza = [temp[3], temp[2], temp[1], temp[0], temp[4], temp[5], temp[6], temp[7]];
+    var pizza = [temp[0], temp[1], temp[5], temp[4], temp[3], temp[2], temp[6], temp[7]];
     temp = game.cars;
-    var cars = [temp[3], temp[2], temp[1], temp[0], temp[4], temp[5], temp[6], temp[7]];
+    var cars = [temp[0], temp[1], temp[5], temp[4], temp[3], temp[2], temp[6], temp[7]];
     var result = { pizza: pizza, cars: cars, ops: game.ops };
     return result;
   },
   "flipUpper": function flipUpper(game) {
+    var temp = game.pizza;
+    var pizza = [temp[7], temp[6], temp[2], temp[3], temp[4], temp[5], temp[1], temp[0]];
+    temp = game.cars;
+    var cars = [temp[7], temp[6], temp[2], temp[3], temp[4], temp[5], temp[1], temp[0]];
+    var result = { pizza: pizza, cars: cars, ops: game.ops };
+    return result;
+  },
+  "flipLeft": function flipLeft(game) {
     var temp = game.pizza;
     var pizza = [temp[0], temp[1], temp[2], temp[3], temp[7], temp[6], temp[5], temp[4]];
     temp = game.cars;
@@ -20,19 +28,11 @@ genetic.operations = {
     var result = { pizza: pizza, cars: cars, ops: game.ops };
     return result;
   },
-  "flipLeft": function flipLeft(game) {
-    var temp = game.pizza;
-    var pizza = [temp[0], temp[1], temp[5], temp[4], temp[3], temp[2], temp[6], temp[7]];
-    temp = game.cars;
-    var cars = [temp[0], temp[1], temp[5], temp[4], temp[3], temp[2], temp[6], temp[7]];
-    var result = { pizza: pizza, cars: cars, ops: game.ops };
-    return result;
-  },
   "flipRight": function flipRight(game) {
     var temp = game.pizza;
-    var pizza = [temp[7], temp[6], temp[2], temp[3], temp[4], temp[5], temp[1], temp[0]];
+    var pizza = [temp[3], temp[2], temp[1], temp[0], temp[4], temp[5], temp[6], temp[7]];
     temp = game.cars;
-    var cars = [temp[7], temp[6], temp[2], temp[3], temp[4], temp[5], temp[1], temp[0]];
+    var cars = [temp[3], temp[2], temp[1], temp[0], temp[4], temp[5], temp[6], temp[7]];
     var result = { pizza: pizza, cars: cars, ops: game.ops };
     return result;
   },
@@ -81,7 +81,20 @@ genetic.operations = {
 };
 genetic.operationsNames = ["flipUnder", "flipUpper", "flipLeft", "flipRight", "rotateCarsC1", "rotateCarsC2",
   "rotateCarsC3", "rotateCarsC4", "rotateCarsC5", "rotateCarsC6", "rotateCarsC7"];
-
+genetic.operationsNamesNl = {
+  "flipUnder": "draai onderkant",
+  "flipUpper": "draai bovenkant",
+  "flipLeft": "draai linkerkant",
+  "flipRight": "draai rechterkant",
+  "rotateCarsC1": "draai auto's 1x",
+  "rotateCarsC2": "draai auto's 2x",
+  "rotateCarsC3": "draai auto's 3x",
+  "rotateCarsC4": "draai auto's 4x",
+  "rotateCarsC5": "draai auto's 5x",
+  "rotateCarsC6": "draai auto's 6x",
+  "rotateCarsC7": "draai auto's 7x"
+};
+  
 genetic.drawCircle = function drawCircle(canvas, size, start, end, color) {
 
   canvas.fillStyle = color;
@@ -96,8 +109,9 @@ genetic.drawCircle = function drawCircle(canvas, size, start, end, color) {
 
 genetic.drawWithFitness = function drawWithFitness(canvasid, game, fitness) {
 
-  var ctx = $('#' + canvasid)[0].getContext("2d");
-  ctx.clearRect(0, 0, $('#' + canvasid)[0].width, $('#' + canvasid)[0].height);
+  var canvas = $('#' + canvasid)[0];
+  var ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   game.cars.forEach(function (c, i) { genetic.drawCircle(ctx, 120,(i * 0.25) - 0.45,(i * 0.25) - 0.3, c); });
 
@@ -112,39 +126,32 @@ genetic.drawWithFitness = function drawWithFitness(canvasid, game, fitness) {
   }
 };
 
-genetic.draw = function draw(canvasid, game) {
-
-  genetic.drawWithFitness(canvasid, game, pop[0].fitness.toPrecision(1));
-};
-
 genetic.simplify = function (ops) {
   var simpleOps = [];
-  var prevOps = "";
   var curOps = "";
-  var rotateCOps = 0;
   for (var i = 0; i < ops.length; i++) {
     curOps = ops[i];
      
-    // Cancel out two equal flips in combination
-    //     if(curOps.indexOf("flip") === 0 && prevOps.indexOf("flip") === 0 && prevOps == curOps){
-    //       simpleOps.pop();
-    //       prevOps = "";
-    //     // combine all rotations into one
-    //     } else 
-    if (curOps.indexOf("rotateCarsC") === 0) {
-      rotateCOps += parseInt(curOps.substr(11));
-      prevOps = curOps;
-    } else if (rotateCOps > 0) {
-      var nrs = rotateCOps % 8;
-      if (nrs > 0) {
-        simpleOps.push("rotateCarsC" + (rotateCOps % 8));
-        rotateCOps = 0;
+    if (simpleOps.length > 0) {
+      var prevOps = simpleOps[simpleOps.length - 1];
+
+      if (curOps.indexOf("rotateCarsC") === 0 && prevOps.indexOf("rotateCarsC") === 0) {
+        var curNr = parseInt(curOps.substr(11), 10);
+        var prevNr = parseInt(prevOps.substr(11), 10);
+
+        simpleOps.pop();
+        var nrs = (curNr + prevNr) % 8;
+        if (nrs > 0) {
+          simpleOps.push("rotateCarsC" + nrs);
+        }
+
+      } else if (curOps.indexOf("flip") === 0 && prevOps.indexOf("flip") === 0 && prevOps == curOps) {
+        simpleOps.pop();
+      } else {
         simpleOps.push(curOps);
       }
-      prevOps = curOps;
     } else {
       simpleOps.push(curOps);
-      prevOps = curOps;
     }
   }
 
@@ -199,30 +206,41 @@ genetic.generation = function (pop, generation, stats) {
 };
 
 genetic.notification = function (pop, generation, stats, isFinished) {
+  console.log(generation);
   var value = pop[0].entity;
   this.last = this.last || value;
 
   this.drawWithFitness('canvas', value, pop[0].fitness.toPrecision(1));
   this.last = value;
 
-  if (isFinished) {
-    var ops = value.ops; //this.simplify(value.ops);
-    if (confirm('Solution in ' + ops.length + ' steps. Visualize?')) {
+  if (isFinished && stats.maximum != 0) {
+
+    $('.oplossing').nextAll("h1, canvas").remove();
+    alert('De oplossing is niet gevonden! :(');
+    
+  } else if (isFinished && stats.maximum == 0) {
+
+    $('.oplossing').nextAll("h1, canvas").remove();
+    
+    var ops = this.simplify(value.ops);
+    if (confirm('De oplossing is ' + ops.length + ' stappen. Zal ik hem tonen?')) {
       var initial = this.userData["initial"];
       initial = {
         pizza: initial.pizza,
         cars: initial.cars,
         ops: []
       };
+      $('<h1>Oplossing</h1>').appendTo("body");
       $('<canvas id="ops" width="350" height="350"></canvas>').appendTo("body");
       this.drawWithFitness('ops', initial, this.distance(initial));
       for (var i = 0; i < ops.length; i++) {
         var op = ops[i];
-        $('<h1>' + op + '</h1>').appendTo("body");
+        $('<h1>' + genetic.operationsNamesNl[op] + '</h1>').appendTo("body");
         $('<canvas id="ops' + i + '" width="350" height="350"></canvas>').appendTo("body");
         initial = this.operations[op](initial);
         this.drawWithFitness('ops' + i, initial, this.distance(initial));
       }
     }
+    
   }
 };
